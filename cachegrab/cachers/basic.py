@@ -6,11 +6,11 @@ import functools
 
 from cachegrab.utils.utils import make_path
 from cachegrab.utils.hash import hash_md5
+from cachegrab.cachers.static import StaticCacheMethods
 
 
 class BasicCachingGetter(object):
-    """
-    Simple cache controller for the most basic use case: wrapping requests, and saving the response as a json.
+    """Simple cache controller for the most basic use case: wrapping requests, and saving the response as a json.
     Really basic, no frills base use case. 
     """
     default_cachepath = './cache/'
@@ -21,23 +21,10 @@ class BasicCachingGetter(object):
         self.hash = hash_md5
         make_path(basepath)
 
-    @staticmethod
-    def json_fetch_and_cache(cachePath, url):
-        """
-        Fetches a URL and saves the result as a json.
-        :param cachePath:
-        :param url:
-        :return:
-        """
-        response = requests.get(url)
-        response = response.json()
-        with open(cachePath, 'w') as f:
-            json.dump(response, f)
-        return response
+
 
     def get(self, url, flush=False):
-        """
-        Wraps requests.get(), saves the response as a json file. 
+        """Wraps requests.get(), saves the response as a json file.
         :param url: Target URL
         :param flush: Refresh cache by forcing a request
         :return:
@@ -55,7 +42,7 @@ class BasicCachingGetter(object):
                     pass
 
         if data is None:
-            data = BasicCachingGetter.json_fetch_and_cache(cachePath, url)
+            data = StaticCacheMethods.json_fetch_and_cache(cachePath, url)
 
         return data
 
