@@ -46,6 +46,29 @@ class BasicCachingGetter(object):
 
         return data
 
+    def getfn(self, fn, kwargs, flush=False):
+        """Wraps requests.get(), saves the response as a json file.
+        :param url: Target URL
+        :param flush: Refresh cache by forcing a request
+        :return:
+        """
+
+        cachePath = "{}/{}.json".format(self.basepath, self.hash(url))
+
+        # Try to extract the file. If it fails, fall through
+        data = None
+        if os.path.exists(cachePath) and not flush:
+            with open(cachePath, 'r') as f:
+                try:
+                    data = json.load(f)
+                except ValueError:
+                    pass
+
+        if data is None:
+            data = StaticCacheMethods.json_fetch_and_cache(cachePath, url)
+
+        return data
+
 
 class memoized(object):
     '''Basic Memoizing Decorator. Caches a function's return value each time it is called.
