@@ -3,6 +3,7 @@ import json
 import requests
 import collections
 import functools
+import shutil
 
 from cachegrab.utils.utils import make_path, load_cached_json, dump_cached_json, freeze_sig
 from cachegrab.utils.hash import hash_md5
@@ -17,7 +18,7 @@ class BasicCachingGetter(object):
     flushKey = '_flush'
 
     def __init__(self, basepath=None):
-        basepath = basepath if basepath is not None else BasicCachingGetter.default_cachepath
+        basepath = BasicCachingGetter.default_cachepath if basepath is None else basepath
         self.basepath = basepath
         self.hash = hash_md5
         self.load = load_cached_json
@@ -29,9 +30,11 @@ class BasicCachingGetter(object):
 
         @functools.wraps(fn)
         def new_fn(*fnargs, **fnkwargs):
+            """Function wrapper"""
+            # first we need to strip the special command "_flush" from arguments so it does not munge the signature
             key = self.flushKey
             flush = fnkwargs.get(key)
-            if flush:
+            if flush is not None:
                 fnkwargs.pop(key)
 
             sig = freeze_sig(fn, *fnargs, **fnkwargs)
@@ -53,6 +56,18 @@ class BasicCachingGetter(object):
             return data
 
         return new_fn
+
+    def purge(self, basepath=None, prompt=True):
+        basepath = self.basepath if basepath is None else basepath
+        if prompt:
+            reply = input("You are about to delete {}. Confirm? [y/N]".format(basepath))
+            if reply != 'y':
+                print('Aborted')
+                return None
+        if os.path.exists(basepath):
+            shutil.rmtree(basepath)
+
+        make_path(basepath)
 
 
 

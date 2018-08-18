@@ -22,16 +22,17 @@ def freeze_sig(f=None, *args, **kwargs):
     :return: JSONified string of function signature
     """
     name = f.__name__ if f is not None else None
-    return json.dumps({'@args': args, '@kwargs': kwargs, '@name': name})
+    frozen = tuple((key, kwargs[key]) for key in sorted(kwargs))        # gotta freeze order so hash is stable
+    return json.dumps((('@args', args), ('@kwargs', frozen), ('@name', name)))
 
 def thaw_sig(string):
     """ Unfreeze a frozen signature back to args and kwargs
     :param string: Frozen signature
     :return:
     """
-    dd = json.loads(string)
+    dd = dict(json.loads(string))
     __args = dd.get('@args') # sanitize???
-    __kwargs = dd.get('@kwargs')
+    __kwargs = dict(dd.get('@kwargs'))
     __name = dd.get('@name')
     return __name, __args, __kwargs
 

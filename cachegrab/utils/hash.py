@@ -12,6 +12,8 @@ def hash_md5(stringable, strict=True):
         raise TypeError('Argument of type {} is not hashable. '
                         'Use a hashable object, or set strict=False'.format(type(stringable)))
 
-    
-    md5_key = md5(str(stringable)).hexdigest()
+
+    payload = str(stringable).encode()
+    print('###', payload)
+    md5_key = md5(payload).hexdigest()
     return md5_key
