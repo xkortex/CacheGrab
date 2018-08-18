@@ -96,3 +96,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# project and dev caches
+cache/
+cachegrab/cache/
+cachegrab/nb/cache/
+
